@@ -10,7 +10,7 @@ def serve_prediction_plot(
     # Get train and test score from model
     y_pred_train = (model.predict_proba(X_train) > threshold).astype(int)
     y_pred_test = (model.predict_proba(X_test) > threshold).astype(int)
-    print(f"{y_train.shape}, {y_pred_train.shape}")
+
     if len(y_pred_train.shape) == 2:
         y_pred_train, y_pred_test = y_pred_train[:, 1], y_pred_test[:, 1]
     train_score = metrics.accuracy_score(y_true=y_train, y_pred=y_pred_train)

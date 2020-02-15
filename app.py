@@ -26,6 +26,7 @@ app = dash.Dash(
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"}
     ],
 )
+app.config['suppress_callback_exceptions'] = True
 server = app.server
 
 
@@ -111,6 +112,50 @@ app.layout = html.Div(
                                     id="first-card",
                                     children=[
                                         drc.NamedDropdown(
+                                            name="Select Model",
+                                            id="dropdown-select-model",
+                                            options=[
+                                                {
+                                                    "label": "Support Vector Machine",
+                                                    "value": "SVM"},
+                                                {
+                                                    "label": "Linear Discriminant Analysis",
+                                                    "value": "LDA",
+                                                },
+                                                {
+                                                    "label": "Quadratic Discriminant Analysis",
+                                                    "value": "QDA",
+                                                },
+                                                {
+                                                    "label": "Multilayer Perceptron",
+                                                    "value": "MLP",
+                                                },
+                                                {
+                                                    "label": "Decision Tree",
+                                                    "value": "DTree",
+                                                },
+                                                {
+                                                    "label": "Random Forest",
+                                                    "value": "RForest",
+                                                },
+                                                {
+                                                    "label": "AdaBoost",
+                                                    "value": "ABoost",
+                                                },
+                                                {
+                                                    "label": "XGBoost",
+                                                    "value": "XGBoost"
+                                                },
+                                                {
+                                                    "label": "k Nearest Neighbors",
+                                                    "value": "kNN",
+                                                },
+                                            ],
+                                            clearable=False,
+                                            searchable=True,
+                                            value="SVM"
+                                        ),
+                                        drc.NamedDropdown(
                                             name="Select Dataset",
                                             id="dropdown-select-dataset",
                                             options=[
@@ -171,101 +216,8 @@ app.layout = html.Div(
                                         ),
                                     ],
                                 ),
-                                drc.Card(
-                                    id="last-card",
-                                    children=[
-                                        drc.NamedDropdown(
-                                            name="Kernel",
-                                            id="dropdown-svm-parameter-kernel",
-                                            options=[
-                                                {
-                                                    "label": "Radial basis function (RBF)",
-                                                    "value": "rbf",
-                                                },
-                                                {"label": "Linear", "value": "linear"},
-                                                {
-                                                    "label": "Polynomial",
-                                                    "value": "poly",
-                                                },
-                                                {
-                                                    "label": "Sigmoid",
-                                                    "value": "sigmoid",
-                                                },
-                                            ],
-                                            value="rbf",
-                                            clearable=False,
-                                            searchable=False,
-                                        ),
-                                        drc.NamedSlider(
-                                            name="Cost (C)",
-                                            id="slider-svm-parameter-C-power",
-                                            min=-2,
-                                            max=4,
-                                            value=0,
-                                            marks={
-                                                i: "{}".format(10 ** i)
-                                                for i in range(-2, 5)
-                                            },
-                                        ),
-                                        drc.FormattedSlider(
-                                            id="slider-svm-parameter-C-coef",
-                                            min=1,
-                                            max=9,
-                                            value=1,
-                                        ),
-                                        drc.NamedSlider(
-                                            name="Degree",
-                                            id="slider-svm-parameter-degree",
-                                            min=2,
-                                            max=10,
-                                            value=3,
-                                            step=1,
-                                            marks={
-                                                str(i): str(i) for i in range(2, 11, 2)
-                                            },
-                                        ),
-                                        drc.NamedSlider(
-                                            name="Gamma",
-                                            id="slider-svm-parameter-gamma-power",
-                                            min=-5,
-                                            max=0,
-                                            value=-1,
-                                            marks={
-                                                i: "{}".format(10 ** i)
-                                                for i in range(-5, 1)
-                                            },
-                                        ),
-                                        drc.FormattedSlider(
-                                            id="slider-svm-parameter-gamma-coef",
-                                            min=1,
-                                            max=9,
-                                            value=5,
-                                        ),
-                                        html.Div(
-                                            id="shrinking-container",
-                                            children=[
-                                                html.P(children="Shrinking"),
-                                                dcc.RadioItems(
-                                                    id="radio-svm-parameter-shrinking",
-                                                    labelStyle={
-                                                        "margin-right": "7px",
-                                                        "display": "inline-block",
-                                                    },
-                                                    options=[
-                                                        {
-                                                            "label": " Enabled",
-                                                            "value": "True",
-                                                        },
-                                                        {
-                                                            "label": " Disabled",
-                                                            "value": "False",
-                                                        },
-                                                    ],
-                                                    value="True",
-                                                ),
-                                            ],
-                                        ),
-                                    ],
+                                html.Div(
+                                    id="model-params",
                                 ),
                             ],
                         ),
@@ -286,6 +238,111 @@ app.layout = html.Div(
         ),
     ]
 )
+
+@app.callback(
+    Output("model-params", "children"),
+    [Input("dropdown-select-model", "value")],
+)
+def get_model_params(model_name):
+    if model_name == "SVM":
+        return  drc.Card(
+                    id="last-card",
+                    children=[
+                        drc.NamedDropdown(
+                            name="Kernel",
+                            id="dropdown-svm-parameter-kernel",
+                            options=[
+                                {
+                                    "label": "Radial basis function (RBF)",
+                                    "value": "rbf",
+                                },
+                                {"label": "Linear", "value": "linear"},
+                                {
+                                    "label": "Polynomial",
+                                    "value": "poly",
+                                },
+                                {
+                                    "label": "Sigmoid",
+                                    "value": "sigmoid",
+                                },
+                            ],
+                            value="rbf",
+                            clearable=False,
+                            searchable=False,
+                        ),
+                        drc.NamedSlider(
+                            name="Cost (C)",
+                            id="slider-svm-parameter-C-power",
+                            min=-2,
+                            max=4,
+                            value=0,
+                            marks={
+                                i: "{}".format(10 ** i)
+                                for i in range(-2, 5)
+                            },
+                        ),
+                        drc.FormattedSlider(
+                            id="slider-svm-parameter-C-coef",
+                            min=1,
+                            max=9,
+                            value=1,
+                        ),
+                        drc.NamedSlider(
+                            name="Degree",
+                            id="slider-svm-parameter-degree",
+                            min=2,
+                            max=10,
+                            value=3,
+                            step=1,
+                            marks={
+                                str(i): str(i) for i in range(2, 11, 2)
+                            },
+                        ),
+                        drc.NamedSlider(
+                            name="Gamma",
+                            id="slider-svm-parameter-gamma-power",
+                            min=-5,
+                            max=0,
+                            value=-1,
+                            marks={
+                                i: "{}".format(10 ** i)
+                                for i in range(-5, 1)
+                            },
+                        ),
+                        drc.FormattedSlider(
+                            id="slider-svm-parameter-gamma-coef",
+                            min=1,
+                            max=9,
+                            value=5,
+                        ),
+                        html.Div(
+                            id="shrinking-container",
+                            children=[
+                                html.P(children="Shrinking"),
+                                dcc.RadioItems(
+                                    id="radio-svm-parameter-shrinking",
+                                    labelStyle={
+                                        "margin-right": "7px",
+                                        "display": "inline-block",
+                                    },
+                                    options=[
+                                        {
+                                            "label": " Enabled",
+                                            "value": "True",
+                                        },
+                                        {
+                                            "label": " Disabled",
+                                            "value": "False",
+                                        },
+                                    ],
+                                    value="True",
+                                ),
+                            ],
+                        ),
+                    ],
+                )
+    else:
+        raise(ValueError(f"Unknown model type: {model_name}"))
 
 
 @app.callback(
