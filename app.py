@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn import datasets
 from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
 from sklearn.discriminant_analysis import (
     LinearDiscriminantAnalysis,
     QuadraticDiscriminantAnalysis,
@@ -221,7 +222,166 @@ app.layout = html.Div(
                                         ),
                                     ],
                                 ),
-                                html.Div(id="model-params",),
+                                drc.Card(
+                                    id="last-card",
+                                    children=[
+                                        html.Div(
+                                            id="svm-params",
+                                            children=[
+                                                drc.NamedDropdown(
+                                                    name="Kernel",
+                                                    id="dropdown-svm-parameter-kernel",
+                                                    options=[
+                                                        {
+                                                            "label": "Radial basis function (RBF)",
+                                                            "value": "rbf",
+                                                        },
+                                                        {
+                                                            "label": "Linear",
+                                                            "value": "linear",
+                                                        },
+                                                        {
+                                                            "label": "Polynomial",
+                                                            "value": "poly",
+                                                        },
+                                                        {
+                                                            "label": "Sigmoid",
+                                                            "value": "sigmoid",
+                                                        },
+                                                    ],
+                                                    value="rbf",
+                                                    clearable=False,
+                                                    searchable=False,
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="Cost (C) for Regularization",
+                                                    id="slider-svm-parameter-C-power",
+                                                    min=-2,
+                                                    max=4,
+                                                    value=0,
+                                                    marks={
+                                                        i: "{}".format(10 ** i)
+                                                        for i in range(-2, 5)
+                                                    },
+                                                ),
+                                                drc.FormattedSlider(
+                                                    id="slider-svm-parameter-C-coef",
+                                                    min=1,
+                                                    max=9,
+                                                    value=1,
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="Degree",
+                                                    id="slider-svm-parameter-degree",
+                                                    min=2,
+                                                    max=10,
+                                                    value=3,
+                                                    step=1,
+                                                    marks={
+                                                        str(i): str(i)
+                                                        for i in range(2, 11, 2)
+                                                    },
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="Gamma",
+                                                    id="slider-svm-parameter-gamma-power",
+                                                    min=-5,
+                                                    max=0,
+                                                    value=-1,
+                                                    marks={
+                                                        i: "{}".format(10 ** i)
+                                                        for i in range(-5, 1)
+                                                    },
+                                                ),
+                                                drc.FormattedSlider(
+                                                    id="slider-svm-parameter-gamma-coef",
+                                                    min=1,
+                                                    max=9,
+                                                    value=5,
+                                                ),
+                                                html.Div(
+                                                    id="shrinking-container",
+                                                    children=[
+                                                        html.P(children="Shrinking"),
+                                                        dcc.RadioItems(
+                                                            id="radio-svm-parameter-shrinking",
+                                                            labelStyle={
+                                                                "margin-right": "7px",
+                                                                "display": "inline-block",
+                                                            },
+                                                            options=[
+                                                                {
+                                                                    "label": " Enabled",
+                                                                    "value": "True",
+                                                                },
+                                                                {
+                                                                    "label": " Disabled",
+                                                                    "value": "False",
+                                                                },
+                                                            ],
+                                                            value="True",
+                                                        ),
+                                                    ],
+                                                ),
+                                            ],
+                                        ),
+                                        html.Div(
+                                            id="logreg-params",
+                                            children=[
+                                                drc.NamedDropdown(
+                                                    name="Regularization Type",
+                                                    id="dropdown-logreg-regtype",
+                                                    options=[
+                                                        {
+                                                            "label": "L1",
+                                                            "value": "l1",
+                                                        },
+                                                        {
+                                                            "label": "L2",
+                                                            "value": "l2",
+                                                        },
+                                                        {
+                                                            "label": "ElasticNet",
+                                                            "value": "elasticnet",
+                                                        },
+                                                        {
+                                                            "label": "None",
+                                                            "value": "none",
+                                                        },
+                                                    ],
+                                                    value="none",
+                                                    clearable=False,
+                                                    searchable=True,
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="Cost (C) for Regularization",
+                                                    id="slider-logreg-C-power",
+                                                    min=-2,
+                                                    max=5,
+                                                    value=0,
+                                                    marks={
+                                                        i: "{}".format(10 ** i)
+                                                        for i in range(-2, 5)
+                                                    },
+                                                ),
+                                                drc.FormattedSlider(
+                                                    id="slider-logreg-C-coef",
+                                                    min=1,
+                                                    max=9,
+                                                    value=1,
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="L1 Contribution (ElasticNet)",
+                                                    id="slider-logreg-l1-ratio",
+                                                    min=0,
+                                                    max=1,
+                                                    step=0.01,
+                                                    value=0.5,
+                                                ),
+                                            ],
+                                        ),
+                                    ],
+                                ),
                             ],
                         ),
                         html.Div(
@@ -243,85 +403,104 @@ app.layout = html.Div(
 )
 
 
+# @app.callback(
+#     Output("model-params", "children"), [Input("dropdown-select-model", "value")],
+# )
+# def get_model_params(model_name):
+#     if model_name == "SVM":
+#         return drc.Card(
+#             id="last-card",
+#             children=[
+#                 drc.NamedDropdown(
+#                     name="Kernel",
+#                     id="dropdown-svm-parameter-kernel",
+#                     options=[
+#                         {"label": "Radial basis function (RBF)", "value": "rbf",},
+#                         {"label": "Linear", "value": "linear"},
+#                         {"label": "Polynomial", "value": "poly",},
+#                         {"label": "Sigmoid", "value": "sigmoid",},
+#                     ],
+#                     value="rbf",
+#                     clearable=False,
+#                     searchable=False,
+#                 ),
+#                 drc.NamedSlider(
+#                     name="Cost (C)",
+#                     id="slider-svm-parameter-C-power",
+#                     min=-2,
+#                     max=4,
+#                     value=0,
+#                     marks={i: "{}".format(10 ** i) for i in range(-2, 5)},
+#                 ),
+#                 drc.FormattedSlider(
+#                     id="slider-svm-parameter-C-coef", min=1, max=9, value=1,
+#                 ),
+#                 drc.NamedSlider(
+#                     name="Degree",
+#                     id="slider-svm-parameter-degree",
+#                     min=2,
+#                     max=10,
+#                     value=3,
+#                     step=1,
+#                     marks={str(i): str(i) for i in range(2, 11, 2)},
+#                 ),
+#                 drc.NamedSlider(
+#                     name="Gamma",
+#                     id="slider-svm-parameter-gamma-power",
+#                     min=-5,
+#                     max=0,
+#                     value=-1,
+#                     marks={i: "{}".format(10 ** i) for i in range(-5, 1)},
+#                 ),
+#                 drc.FormattedSlider(
+#                     id="slider-svm-parameter-gamma-coef", min=1, max=9, value=5,
+#                 ),
+#                 html.Div(
+#                     id="shrinking-container",
+#                     children=[
+#                         html.P(children="Shrinking"),
+#                         dcc.RadioItems(
+#                             id="radio-svm-parameter-shrinking",
+#                             labelStyle={
+#                                 "margin-right": "7px",
+#                                 "display": "inline-block",
+#                             },
+#                             options=[
+#                                 {"label": " Enabled", "value": "True",},
+#                                 {"label": " Disabled", "value": "False",},
+#                             ],
+#                             value="True",
+#                         ),
+#                     ],
+#                 ),
+#             ],
+#         )
+#     elif model_name == "LDA":
+#         return drc.Card(id="last-card", children=[])
+#     else:
+#         raise (ValueError(f"Unknown model type: {model_name}"))
+
+
 @app.callback(
-    Output("model-params", "children"), [Input("dropdown-select-model", "value")],
+    Output("svm-params", "style"),
+    [Input("dropdown-select-model", "value")]
 )
-def get_model_params(model_name):
-    if model_name == "SVM":
-        return drc.Card(
-            id="last-card",
-            children=[
-                drc.NamedDropdown(
-                    name="Kernel",
-                    id="dropdown-svm-parameter-kernel",
-                    options=[
-                        {"label": "Radial basis function (RBF)", "value": "rbf",},
-                        {"label": "Linear", "value": "linear"},
-                        {"label": "Polynomial", "value": "poly",},
-                        {"label": "Sigmoid", "value": "sigmoid",},
-                    ],
-                    value="rbf",
-                    clearable=False,
-                    searchable=False,
-                ),
-                drc.NamedSlider(
-                    name="Cost (C)",
-                    id="slider-svm-parameter-C-power",
-                    min=-2,
-                    max=4,
-                    value=0,
-                    marks={i: "{}".format(10 ** i) for i in range(-2, 5)},
-                ),
-                drc.FormattedSlider(
-                    id="slider-svm-parameter-C-coef", min=1, max=9, value=1,
-                ),
-                drc.NamedSlider(
-                    name="Degree",
-                    id="slider-svm-parameter-degree",
-                    min=2,
-                    max=10,
-                    value=3,
-                    step=1,
-                    marks={str(i): str(i) for i in range(2, 11, 2)},
-                ),
-                drc.NamedSlider(
-                    name="Gamma",
-                    id="slider-svm-parameter-gamma-power",
-                    min=-5,
-                    max=0,
-                    value=-1,
-                    marks={i: "{}".format(10 ** i) for i in range(-5, 1)},
-                ),
-                drc.FormattedSlider(
-                    id="slider-svm-parameter-gamma-coef", min=1, max=9, value=5,
-                ),
-                html.Div(
-                    id="shrinking-container",
-                    children=[
-                        html.P(children="Shrinking"),
-                        dcc.RadioItems(
-                            id="radio-svm-parameter-shrinking",
-                            labelStyle={
-                                "margin-right": "7px",
-                                "display": "inline-block",
-                            },
-                            options=[
-                                {"label": " Enabled", "value": "True",},
-                                {"label": " Disabled", "value": "False",},
-                            ],
-                            value="True",
-                        ),
-                    ],
-                ),
-            ],
-        )
-    elif model_name == "LDA":
-        return drc.Card(
-            id="last-card",
-            children=[]
-        )
+def show_svm_params(model):
+    if model == "SVM":
+        return {"visibility": "visible"}
     else:
-        raise (ValueError(f"Unknown model type: {model_name}"))
+        return {"display": "none"}
+
+
+@app.callback(
+    Output("logreg-params", "style"),
+    [Input("dropdown-select-model", "value")]
+)
+def show_logreg_params(model):
+    if model == "LogReg":
+        return {"visibility": "visible"}
+    else:
+        return {"display": "none"}
 
 
 @app.callback(
@@ -345,15 +524,9 @@ def update_slider_svm_parameter_C_coef(power):
 @app.callback(
     Output("slider-threshold", "value"),
     [Input("button-zero-threshold", "n_clicks")],
-    [State("graph-sklearn-svm", "figure")],
 )
-def reset_threshold_center(n_clicks, figure):
-    if n_clicks:
-        Z = np.array(figure["data"][0]["z"])
-        value = -Z.min() / (Z.max() - Z.min())
-    else:
-        value = 0.4959986285375595
-    return value
+def reset_threshold_center(n_clicks):
+    return 0.4959986285375595
 
 
 # Disable Sliders if kernel not in the given list
@@ -382,8 +555,26 @@ def disable_slider_param_gamma_power(kernel):
 
 
 @app.callback(
+    Output("slider-logreg-C-coef", "marks"),
+    [Input("slider-logreg-C-power", "value")],
+)
+def update_slider_logreg_C_coef(power):
+    scale = 10 ** power
+    return {i: str(round(i * scale, 8)) for i in range(1, 10, 2)}
+
+# disable elasticNet slider if other regularization
+@app.callback(
+    Output("slider-logreg-l1-ratio", "disabled"),
+    [Input("dropdown-logreg-regtype", "value")]
+)
+def disable_slider_logreg_l1_ratio(reg_type):
+    return reg_type != "elasticnet"
+
+
+@app.callback(
     Output("div-graphs", "children"),
     [
+        Input("dropdown-select-model", "value"),
         Input("dropdown-svm-parameter-kernel", "value"),
         Input("slider-svm-parameter-degree", "value"),
         Input("slider-svm-parameter-C-coef", "value"),
@@ -395,9 +586,14 @@ def disable_slider_param_gamma_power(kernel):
         Input("radio-svm-parameter-shrinking", "value"),
         Input("slider-threshold", "value"),
         Input("slider-dataset-sample-size", "value"),
+        Input("dropdown-logreg-regtype", "value"),
+        Input("slider-logreg-C-coef", "value"),
+        Input("slider-logreg-C-power", "value"),
+        Input("slider-logreg-l1-ratio", "value"),
     ],
 )
 def update_svm_graph(
+    model,
     kernel,
     degree,
     C_coef,
@@ -409,6 +605,10 @@ def update_svm_graph(
     shrinking,
     threshold,
     sample_size,
+    logreg_reg_type,
+    logreg_C_coef,
+    logreg_C_power,
+    logreg_l1_ratio
 ):
     t_start = time.time()
     h = 0.3  # step size in the mesh
@@ -426,19 +626,37 @@ def update_svm_graph(
     y_max = X[:, 1].max() + 0.5
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
 
-    C = C_coef * 10 ** C_power
-    gamma = gamma_coef * 10 ** gamma_power
+    if model == "SVM":
+        C = C_coef * 10 ** C_power
+        gamma = gamma_coef * 10 ** gamma_power
 
-    if shrinking == "True":
-        flag = True
+        if shrinking == "True":
+            flag = True
+        else:
+            flag = False
+
+        clf = SVC(
+            C=C, kernel=kernel, degree=degree, gamma=gamma, shrinking=flag, probability=True
+        )
+    
+    elif model == "LogReg":
+        C = logreg_C_coef * 10 ** logreg_C_power
+
+        if logreg_reg_type == "none" or logreg_reg_type == "elasticnet":
+            solver = "saga"
+        else:
+            solver = "liblinear"
+
+        clf = LogisticRegression(
+            penalty=logreg_reg_type, C=C, l1_ratio=logreg_l1_ratio, solver=solver
+        )
+
+    elif model == "LDA":
+        clf = LinearDiscriminantAnalysis()
+    elif model == "QDA":
+        clf = QuadraticDiscriminantAnalysis()
     else:
-        flag = False
-
-    # Train SVM
-    clf = SVC(
-        C=C, kernel=kernel, degree=degree, gamma=gamma, shrinking=flag, probability=True
-    )
-    # clf = QuadraticDiscriminantAnalysis()
+        raise ValueError(f"Unsupported model: {model}")
     # clf = DecisionTreeClassifier()
     # clf = MLPClassifier()
     clf.fit(X_train, y_train)
@@ -494,6 +712,7 @@ def update_svm_graph(
             ],
         ),
     ]
+
 
 # @app.callback(
 #     Output("div-graphs", "children"),
@@ -572,7 +791,6 @@ def update_svm_graph(
 #             ],
 #         ),
 #     ]
-
 
 
 # Running the server
