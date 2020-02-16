@@ -89,17 +89,17 @@ app.layout = html.Div(
                                         "color": "inherit",
                                     },
                                 ),
-                                html.Img(
-                                    src=app.get_asset_url("visualizerlogo.png"),
-                                    style={
-                                        "width": "auto",
-                                        "height": "auto",
-                                        "max-width": "60px",
-                                        "max-height": "60px",
-                                        "padding-left": "20px",
-                                        "padding-bottom": "25px",
-                                    },
-                                ),
+                                # html.Img(
+                                #     src=app.get_asset_url("visualizerlogo.png"),
+                                #     style={
+                                #         "width": "auto",
+                                #         "height": "auto",
+                                #         "max-width": "60px",
+                                #         "max-height": "60px",
+                                #         "padding-left": "20px",
+                                #         "padding-bottom": "25px",
+                                #     },
+                                # ),
                             ],
                         ),
                         html.A(
