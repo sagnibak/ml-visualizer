@@ -89,10 +89,10 @@ app.layout = html.Div(
                                 "float": "left",
                                 "margin-top": "17px",
                                 "padding-bottom": "10px",
-                                "padding-right": "20px"
+                                "padding-right": "20px",
                             },
                         ),
-                       html.H2(
+                        html.H2(
                             id="banner-title",
                             children=[
                                 html.A(
@@ -452,6 +452,35 @@ app.layout = html.Div(
                                             ],
                                         ),
                                         html.Div(
+                                            id="dtree-params",
+                                            children=[
+                                                drc.NamedSlider(
+                                                    name="Minimum Leaf Size",
+                                                    id="slider-dt-min-leaf",
+                                                    min=1,
+                                                    max=50,
+                                                    value=1,
+                                                    marks={
+                                                        i: str(i)
+                                                        for i in [1]
+                                                        + list(range(0, 51, 10))
+                                                    },
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="Maximum Depth",
+                                                    id="slider-dt-max-depth",
+                                                    min=1,
+                                                    max=50,
+                                                    value=3,
+                                                    marks={
+                                                        i: str(i)
+                                                        for i in [1]
+                                                        + list(range(0, 51, 10))
+                                                    },
+                                                ),
+                                            ],
+                                        ),
+                                        html.Div(
                                             id="adaboost-params",
                                             children=[
                                                 drc.NamedSlider(
@@ -570,6 +599,16 @@ def show_logreg_params(model):
 @app.callback(Output("mlp-params", "style"), [Input("dropdown-select-model", "value")])
 def show_mlp_params(model):
     if model == "MLP":
+        return {"visibility": "visible"}
+    else:
+        return {"display": "none"}
+
+
+@app.callback(
+    Output("dtree-params", "style"), [Input("dropdown-select-model", "value")]
+)
+def show_adaboost_params(model):
+    if model == "DTree":
         return {"visibility": "visible"}
     else:
         return {"display": "none"}
@@ -728,6 +767,8 @@ def update_slider_mlp_penalty_coef(power):
         Input("slider-mlp-batch-size", "value"),
         Input("slider-mlp-penalty-coef", "value"),
         Input("slider-mlp-penalty-power", "value"),
+        Input("slider-dt-min-leaf", "value"),
+        Input("slider-dt-max-depth", "value"),
         Input("slider-ab-n-estim", "value"),
         Input("slider-xg-n-estim", "value"),
         Input("slider-xg-min-leaf", "value"),
@@ -757,6 +798,8 @@ def update_svm_graph(
     mlp_batch_size,
     mlp_l2_coef,
     mlp_l2_pow,
+    dt_min_leaf_size,
+    dt_max_depth,
     aboost_n_estimators,
     xg_n_estimators,
     xg_min_leaf_size,
@@ -826,7 +869,9 @@ def update_svm_graph(
         )
 
     elif model == "DTree":
-        clf = DecisionTreeClassifier()
+        clf = DecisionTreeClassifier(
+            min_samples_leaf=dt_min_leaf_size, max_depth=dt_max_depth
+        )
 
     elif model == "RForest":
         clf = RandomForestClassifier()
