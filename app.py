@@ -436,6 +436,22 @@ app.layout = html.Div(
                                                 ),
                                             ],
                                         ),
+                                        html.Div(
+                                            id="knn-params",
+                                            children=[
+                                                drc.NamedSlider(
+                                                    name="k",
+                                                    id="slider-knn-k",
+                                                    min=1,
+                                                    max=50,
+                                                    value=5,
+                                                    marks={
+                                                        i: str(i) for i in
+                                                            [1] + list(range(10, 51, 10))
+                                                    }
+                                                )
+                                            ]
+                                        )
                                     ],
                                 ),
                             ],
@@ -480,6 +496,17 @@ def show_logreg_params(model):
 @app.callback(Output("mlp-params", "style"), [Input("dropdown-select-model", "value")])
 def show_mlp_params(model):
     if model == "MLP":
+        return {"visibility": "visible"}
+    else:
+        return {"display": "none"}
+
+
+@app.callback(
+    Output("knn-params", "style"),
+    [Input("dropdown-select-model", "value")]
+)
+def show_knn_params(model):
+    if model == "kNN":
         return {"visibility": "visible"}
     else:
         return {"display": "none"}
@@ -610,6 +637,7 @@ def update_slider_mlp_penalty_coef(power):
         Input("slider-mlp-batch-size", "value"),
         Input("slider-mlp-penalty-coef", "value"),
         Input("slider-mlp-penalty-power", "value"),
+        Input("slider-knn-k", "value"),
     ],
 )
 def update_svm_graph(
@@ -634,6 +662,7 @@ def update_svm_graph(
     mlp_batch_size,
     mlp_l2_coef,
     mlp_l2_pow,
+    knn_k,
 ):
     h = 0.3  # step size in the mesh
 
@@ -710,7 +739,7 @@ def update_svm_graph(
         clf = GradientBoostingClassifier()
 
     elif model == "kNN":
-        clf = KNeighborsClassifier()
+        clf = KNeighborsClassifier(n_neighbors=knn_k)
 
     else:
         raise ValueError(f"Unsupported model: {model}")
