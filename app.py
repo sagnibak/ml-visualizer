@@ -79,7 +79,20 @@ app.layout = html.Div(
                     className="container scalable",
                     children=[
                         # Change App Name here
-                        html.H2(
+                        html.Img(
+                            src=app.get_asset_url("visualizerlogo.png"),
+                            style={
+                                "width": "auto",
+                                "height": "auto",
+                                "max-width": "60px",
+                                "max-height": "60px",
+                                "float": "left",
+                                "margin-top": "17px",
+                                "padding-bottom": "10px",
+                                "padding-right": "20px"
+                            },
+                        ),
+                       html.H2(
                             id="banner-title",
                             children=[
                                 html.A(
@@ -87,17 +100,6 @@ app.layout = html.Div(
                                     style={
                                         "text-decoration": "none",
                                         "color": "inherit",
-                                    },
-                                ),
-                                html.Img(
-                                    src=app.get_asset_url("visualizerlogo.png"),
-                                    style={
-                                        "width": "auto",
-                                        "height": "auto",
-                                        "max-width": "60px",
-                                        "max-height": "60px",
-                                        "padding-left": "30px",
-                                        "padding-bottom": "30px",
                                     },
                                 ),
                             ],
