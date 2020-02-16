@@ -78,15 +78,9 @@ app.layout = html.Div(
                 html.Div(
                     className="container scalable",
                     children=[
-                        html.A(
-                            id="banner-logo",
-                            children=[
-                            ],
-                        ),
                         # Change App Name here
                         html.H2(
                             id="banner-title",
-                            style={"text-align": "center"},
                             children=[
                                 html.A(
                                     "Decision Boundary Visualizer",
@@ -100,9 +94,10 @@ app.layout = html.Div(
                                     style={
                                         "width": "auto",
                                         "height": "auto",
-                                        "max-width": "80px",
-                                        "max-height": "80px",
-                                        "padding-left" : "200px"
+                                        "max-width": "60px",
+                                        "max-height": "60px",
+                                        "padding-left": "20px",
+                                        "padding-bottom": "25px"
                                     },
                                 ),
                             ],
