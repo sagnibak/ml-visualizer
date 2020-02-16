@@ -88,7 +88,8 @@ app.layout = html.Div(
                         html.A(
                             id="banner-logo",
                             children=[
-                                html.Img(src=app.get_asset_url("dash-logo-new.png"))
+                                html.Img(src=app.get_asset_url("dash-logo-new.png")),
+                                html.H3("Made with")
                             ],
                             href="https://plot.ly/products/dash/",
                         ),

@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Playfair+Display');
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap');
 
 #body {
     padding-bottom: 5rem;
@@ -22,17 +23,17 @@
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 .banner {
     background-color: #2f3445; /* Machine Learning Color is orange */
-    padding: 3rem 0;
     width: 100%;
     margin-bottom: 5rem;
+    height: 100px;
+    padding: 0;
 }
 
 .banner h2 {
-    color: #a5b1cd;
+    color: white;
     display: inline-block;
-    font-family: 'Playfair Display', sans-serif;
-    font-size: 4rem;
-    line-height: 1;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 5rem;
     text-align: center;
 }
 
@@ -41,11 +42,21 @@
     cursor: pointer;
 }
 
+.banner h3 {
+    float: right;
+    color: white;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
 .banner Img {
     position: relative;
     float: right;
     height: 5rem;
-    margin-top: 1.25rem
+    margin-top: 1.25rem;
+    height: 30px;
+    width: 150px;
 }
 
 @media (max-width: 1300px) {
