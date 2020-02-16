@@ -394,6 +394,7 @@ app.layout = html.Div(
                                                     type="text",
                                                     value="100, 100",
                                                     placeholder="layer 1, layer 2, ...",
+                                                    debounce=True,
                                                 ),
                                                 drc.NamedDropdown(
                                                     name="Activation Function",
@@ -435,6 +436,22 @@ app.layout = html.Div(
                                                     value=1,
                                                 ),
                                             ],
+                                        ),
+                                        html.Div(
+                                            id="adaboost-params",
+                                            children=[
+                                                drc.NamedSlider(
+                                                    name="Number of Stumps",
+                                                    id="slider-ab-n-estim",
+                                                    min=1,
+                                                    max=300,
+                                                    value=50,
+                                                    marks={
+                                                        i: str(i) for i in
+                                                            [1] + list(range(0, 301, 50))
+                                                    },
+                                                )
+                                            ]
                                         ),
                                         html.Div(
                                             id="knn-params",
@@ -492,7 +509,6 @@ def show_logreg_params(model):
     else:
         return {"display": "none"}
 
-
 @app.callback(Output("mlp-params", "style"), [Input("dropdown-select-model", "value")])
 def show_mlp_params(model):
     if model == "MLP":
@@ -500,6 +516,12 @@ def show_mlp_params(model):
     else:
         return {"display": "none"}
 
+@app.callback(Output("adaboost-params", "style"), [Input("dropdown-select-model", "value")])
+def show_adaboost_params(model):
+    if model == "ABoost":
+        return {"visibility": "visible"}
+    else:
+        return {"display": "none"}
 
 @app.callback(
     Output("knn-params", "style"),
@@ -637,6 +659,7 @@ def update_slider_mlp_penalty_coef(power):
         Input("slider-mlp-batch-size", "value"),
         Input("slider-mlp-penalty-coef", "value"),
         Input("slider-mlp-penalty-power", "value"),
+        Input("slider-ab-n-estim", "value"),
         Input("slider-knn-k", "value"),
     ],
 )
@@ -662,6 +685,7 @@ def update_svm_graph(
     mlp_batch_size,
     mlp_l2_coef,
     mlp_l2_pow,
+    aboost_n_estimators,
     knn_k,
 ):
     h = 0.3  # step size in the mesh
@@ -733,7 +757,7 @@ def update_svm_graph(
         clf = RandomForestClassifier()
 
     elif model == "ABoost":
-        clf = AdaBoostClassifier()
+        clf = AdaBoostClassifier(n_estimators=aboost_n_estimators)
 
     elif model == "XGBoost":
         clf = GradientBoostingClassifier()
