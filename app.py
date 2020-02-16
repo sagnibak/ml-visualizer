@@ -481,6 +481,47 @@ app.layout = html.Div(
                                             ],
                                         ),
                                         html.Div(
+                                            id="rforest-params",
+                                            children=[
+                                                drc.NamedSlider(
+                                                    name="Number of Trees",
+                                                    id="slider-rf-n-estim",
+                                                    min=1,
+                                                    max=300,
+                                                    value=50,
+                                                    marks={
+                                                        i: str(i)
+                                                        for i in [1]
+                                                        + list(range(0, 301, 50))
+                                                    },
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="Minimum Leaf Size",
+                                                    id="slider-rf-min-leaf",
+                                                    min=1,
+                                                    max=50,
+                                                    value=1,
+                                                    marks={
+                                                        i: str(i)
+                                                        for i in [1]
+                                                        + list(range(0, 51, 10))
+                                                    },
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="Maximum Depth of Trees",
+                                                    id="slider-rf-max-depth",
+                                                    min=1,
+                                                    max=50,
+                                                    value=3,
+                                                    marks={
+                                                        i: str(i)
+                                                        for i in [1]
+                                                        + list(range(0, 51, 10))
+                                                    },
+                                                ),
+                                            ],
+                                        ),
+                                        html.Div(
                                             id="adaboost-params",
                                             children=[
                                                 drc.NamedSlider(
@@ -607,8 +648,18 @@ def show_mlp_params(model):
 @app.callback(
     Output("dtree-params", "style"), [Input("dropdown-select-model", "value")]
 )
-def show_adaboost_params(model):
+def show_dtree_params(model):
     if model == "DTree":
+        return {"visibility": "visible"}
+    else:
+        return {"display": "none"}
+
+
+@app.callback(
+    Output("rforest-params", "style"), [Input("dropdown-select-model", "value")]
+)
+def show_rforest_params(model):
+    if model == "RForest":
         return {"visibility": "visible"}
     else:
         return {"display": "none"}
@@ -769,6 +820,9 @@ def update_slider_mlp_penalty_coef(power):
         Input("slider-mlp-penalty-power", "value"),
         Input("slider-dt-min-leaf", "value"),
         Input("slider-dt-max-depth", "value"),
+        Input("slider-rf-n-estim", "value"),
+        Input("slider-rf-min-leaf", "value"),
+        Input("slider-rf-max-depth", "value"),
         Input("slider-ab-n-estim", "value"),
         Input("slider-xg-n-estim", "value"),
         Input("slider-xg-min-leaf", "value"),
@@ -800,6 +854,9 @@ def update_svm_graph(
     mlp_l2_pow,
     dt_min_leaf_size,
     dt_max_depth,
+    rf_n_estimators,
+    rf_min_leaf_size,
+    rf_max_depth,
     aboost_n_estimators,
     xg_n_estimators,
     xg_min_leaf_size,
@@ -874,7 +931,11 @@ def update_svm_graph(
         )
 
     elif model == "RForest":
-        clf = RandomForestClassifier()
+        clf = RandomForestClassifier(
+            n_estimators=rf_n_estimators,
+            min_samples_leaf=rf_min_leaf_size,
+            max_depth=rf_max_depth,
+        )
 
     elif model == "ABoost":
         clf = AdaBoostClassifier(n_estimators=aboost_n_estimators)
