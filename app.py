@@ -78,9 +78,15 @@ app.layout = html.Div(
                 html.Div(
                     className="container scalable",
                     children=[
+                        html.A(
+                            id="banner-logo",
+                            children=[
+                            ],
+                        ),
                         # Change App Name here
                         html.H2(
                             id="banner-title",
+                            style={"text-align": "center"},
                             children=[
                                 html.A(
                                     "Decision Boundary Visualizer",
@@ -88,11 +94,21 @@ app.layout = html.Div(
                                         "text-decoration": "none",
                                         "color": "inherit",
                                     },
-                                )
+                                ),
+                                html.Img(
+                                    src=app.get_asset_url("visualizerlogo.png"),
+                                    style={
+                                        "width": "auto",
+                                        "height": "auto",
+                                        "max-width": "80px",
+                                        "max-height": "80px",
+                                        "padding-left" : "200px"
+                                    },
+                                ),
                             ],
                         ),
                         html.A(
-                            id="banner-logo",
+                            id="attribution-logo",
                             children=[
                                 html.Img(src=app.get_asset_url("dash-logo-new.png")),
                                 html.H3("Made with"),
