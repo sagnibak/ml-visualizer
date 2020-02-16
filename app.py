@@ -395,6 +395,7 @@ app.layout = html.Div(
                                                     value="100, 100",
                                                     placeholder="layer 1, layer 2, ...",
                                                     debounce=True,
+                                                    style={"color": "inherit"},
                                                 ),
                                                 drc.NamedDropdown(
                                                     name="Activation Function",
@@ -447,11 +448,12 @@ app.layout = html.Div(
                                                     max=300,
                                                     value=50,
                                                     marks={
-                                                        i: str(i) for i in
-                                                            [1] + list(range(0, 301, 50))
+                                                        i: str(i)
+                                                        for i in [1]
+                                                        + list(range(0, 301, 50))
                                                     },
                                                 )
-                                            ]
+                                            ],
                                         ),
                                         html.Div(
                                             id="knn-params",
@@ -463,12 +465,13 @@ app.layout = html.Div(
                                                     max=50,
                                                     value=5,
                                                     marks={
-                                                        i: str(i) for i in
-                                                            [1] + list(range(10, 51, 10))
-                                                    }
+                                                        i: str(i)
+                                                        for i in [1]
+                                                        + list(range(10, 51, 10))
+                                                    },
                                                 )
-                                            ]
-                                        )
+                                            ],
+                                        ),
                                     ],
                                 ),
                             ],
@@ -509,6 +512,7 @@ def show_logreg_params(model):
     else:
         return {"display": "none"}
 
+
 @app.callback(Output("mlp-params", "style"), [Input("dropdown-select-model", "value")])
 def show_mlp_params(model):
     if model == "MLP":
@@ -516,17 +520,18 @@ def show_mlp_params(model):
     else:
         return {"display": "none"}
 
-@app.callback(Output("adaboost-params", "style"), [Input("dropdown-select-model", "value")])
+
+@app.callback(
+    Output("adaboost-params", "style"), [Input("dropdown-select-model", "value")]
+)
 def show_adaboost_params(model):
     if model == "ABoost":
         return {"visibility": "visible"}
     else:
         return {"display": "none"}
 
-@app.callback(
-    Output("knn-params", "style"),
-    [Input("dropdown-select-model", "value")]
-)
+
+@app.callback(Output("knn-params", "style"), [Input("dropdown-select-model", "value")])
 def show_knn_params(model):
     if model == "kNN":
         return {"visibility": "visible"}
