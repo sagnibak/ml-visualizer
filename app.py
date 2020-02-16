@@ -77,8 +77,7 @@ app.layout = html.Div(
                             id="banner-title",
                             children=[
                                 html.A(
-                                    "Support Vector Machine (SVM) Explorer",
-                                    href="https://github.com/plotly/dash-svm",
+                                    "Decision Boundary Visualizer",
                                     style={
                                         "text-decoration": "none",
                                         "color": "inherit",
@@ -695,15 +694,10 @@ def update_svm_graph(
 
     else:
         raise ValueError(f"Unsupported model: {model}")
-    # clf = DecisionTreeClassifier()
-    # clf = MLPClassifier()
     clf.fit(X_train, y_train)
 
     # Plot the decision boundary. For that, we will assign a color to each
     # point in the mesh [x_min, x_max]x[y_min, y_max].
-    # if hasattr(clf, "decision_function"):
-    #     Z = clf.decision_function(np.c_[xx.ravel(), yy.ravel()])
-    # else:
     Z = clf.predict_proba(np.c_[xx.ravel(), yy.ravel()])[:, 1]
 
     prediction_figure = figs.serve_prediction_plot(
