@@ -51,6 +51,13 @@ def NamedRadioItems(name, **kwargs):
     )
 
 
+def NamedInput(name, **kwargs):
+    return html.Div(
+        style={"padding": "20px 10px 25px 4px"},
+        children=[html.P(children=f"{name}:"), dcc.Input(**kwargs)]
+    )
+
+
 # Non-generic
 def DemoDescription(filename, strip=False):
     with open(filename, "r") as file:

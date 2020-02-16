@@ -254,7 +254,7 @@ app.layout = html.Div(
                                                     searchable=False,
                                                 ),
                                                 drc.NamedSlider(
-                                                    name="Cost (C) for Regularization",
+                                                    name="Cost (C) for Slack",
                                                     id="slider-svm-parameter-C-power",
                                                     min=-2,
                                                     max=4,
@@ -332,14 +332,8 @@ app.layout = html.Div(
                                                     name="Regularization Type",
                                                     id="dropdown-logreg-regtype",
                                                     options=[
-                                                        {
-                                                            "label": "L1",
-                                                            "value": "l1",
-                                                        },
-                                                        {
-                                                            "label": "L2",
-                                                            "value": "l2",
-                                                        },
+                                                        {"label": "L1", "value": "l1",},
+                                                        {"label": "L2", "value": "l2",},
                                                         {
                                                             "label": "ElasticNet",
                                                             "value": "elasticnet",
@@ -377,6 +371,62 @@ app.layout = html.Div(
                                                     max=1,
                                                     step=0.01,
                                                     value=0.5,
+                                                    marks={
+                                                        0: "0.0",
+                                                        0.5: "0.5",
+                                                        1: "1.0",
+                                                    },
+                                                ),
+                                            ],
+                                        ),
+                                        html.Div(
+                                            id="mlp-params",
+                                            children=[
+                                                drc.NamedInput(
+                                                    name="Hidden layer sizes",
+                                                    id="input-mlp-layers",
+                                                    type="text",
+                                                    value="100, 100",
+                                                    placeholder="layer 1, layer 2, ...",
+                                                ),
+                                                drc.NamedDropdown(
+                                                    name="Activation Function",
+                                                    id="dropdown-mlp-activation",
+                                                    options=[
+                                                        {"label": act, "value": act}
+                                                        for act in (
+                                                            "identity",
+                                                            "logistic",
+                                                            "tanh",
+                                                            "relu",
+                                                        )
+                                                    ],
+                                                    clearable=False,
+                                                    searchable=True,
+                                                    value="relu",
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="Batch Size",
+                                                    id="slider-mlp-batch-size",
+                                                    min=1,
+                                                    included=False,
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="L2 penalty",
+                                                    id="slider-mlp-penalty-power",
+                                                    min=-2,
+                                                    max=5,
+                                                    value=0,
+                                                    marks={
+                                                        i: "{}".format(10 ** i)
+                                                        for i in range(-2, 5)
+                                                    },
+                                                ),
+                                                drc.FormattedSlider(
+                                                    id="slider-mlp-penalty-coef",
+                                                    min=1,
+                                                    max=9,
+                                                    value=1,
                                                 ),
                                             ],
                                         ),
@@ -403,10 +453,7 @@ app.layout = html.Div(
 )
 
 
-@app.callback(
-    Output("svm-params", "style"),
-    [Input("dropdown-select-model", "value")]
-)
+@app.callback(Output("svm-params", "style"), [Input("dropdown-select-model", "value")])
 def show_svm_params(model):
     if model == "SVM":
         return {"visibility": "visible"}
@@ -415,11 +462,20 @@ def show_svm_params(model):
 
 
 @app.callback(
-    Output("logreg-params", "style"),
-    [Input("dropdown-select-model", "value")]
+    Output("logreg-params", "style"), [Input("dropdown-select-model", "value")]
 )
 def show_logreg_params(model):
     if model == "LogReg":
+        return {"visibility": "visible"}
+    else:
+        return {"display": "none"}
+
+
+@app.callback(
+    Output("mlp-params", "style"), [Input("dropdown-select-model", "value")]
+)
+def show_mlp_params(model):
+    if model == "MLP":
         return {"visibility": "visible"}
     else:
         return {"display": "none"}
@@ -444,11 +500,10 @@ def update_slider_svm_parameter_C_coef(power):
 
 
 @app.callback(
-    Output("slider-threshold", "value"),
-    [Input("button-zero-threshold", "n_clicks")],
+    Output("slider-threshold", "value"), [Input("button-zero-threshold", "n_clicks")],
 )
 def reset_threshold_center(n_clicks):
-    return 0.4959986285375595
+    return 0.499
 
 
 # Disable Sliders if kernel not in the given list
@@ -477,20 +532,54 @@ def disable_slider_param_gamma_power(kernel):
 
 
 @app.callback(
-    Output("slider-logreg-C-coef", "marks"),
-    [Input("slider-logreg-C-power", "value")],
+    Output("slider-logreg-C-coef", "marks"), [Input("slider-logreg-C-power", "value")],
 )
 def update_slider_logreg_C_coef(power):
     scale = 10 ** power
     return {i: str(round(i * scale, 8)) for i in range(1, 10, 2)}
 
+
 # disable elasticNet slider if other regularization
 @app.callback(
     Output("slider-logreg-l1-ratio", "disabled"),
-    [Input("dropdown-logreg-regtype", "value")]
+    [Input("dropdown-logreg-regtype", "value")],
 )
 def disable_slider_logreg_l1_ratio(reg_type):
     return reg_type != "elasticnet"
+
+
+# set max, value, and marks for batch size slider for MLP
+@app.callback(
+    Output("slider-mlp-batch-size", "max"),
+    [Input("slider-dataset-sample-size", "value")],
+)
+def update_mlp_batch_size_max(sample_size):
+    return sample_size
+
+
+@app.callback(
+    Output("slider-mlp-batch-size", "value"),
+    [Input("slider-dataset-sample-size", "value")],
+)
+def update_mlp_batch_size_value(sample_size):
+    return sample_size // 2
+
+
+@app.callback(
+    Output("slider-mlp-batch-size", "marks"),
+    [Input("slider-dataset-sample-size", "value")],
+)
+def update_mlp_batch_size_marks(sample_size):
+    return {1: "1", sample_size: str(sample_size)}
+
+
+@app.callback(
+    Output("slider-mlp-penalty-coef", "marks"),
+    [Input("slider-mlp-penalty-power", "value")],
+)
+def update_slider_mlp_penalty_coef(power):
+    scale = 10 ** power
+    return {i: str(round(i * scale, 8)) for i in range(1, 10, 2)}
 
 
 @app.callback(
@@ -512,6 +601,11 @@ def disable_slider_logreg_l1_ratio(reg_type):
         Input("slider-logreg-C-coef", "value"),
         Input("slider-logreg-C-power", "value"),
         Input("slider-logreg-l1-ratio", "value"),
+        Input("input-mlp-layers", "value"),
+        Input("dropdown-mlp-activation", "value"),
+        Input("slider-mlp-batch-size", "value"),
+        Input("slider-mlp-penalty-coef", "value"),
+        Input("slider-mlp-penalty-power", "value"),
     ],
 )
 def update_svm_graph(
@@ -530,9 +624,13 @@ def update_svm_graph(
     logreg_reg_type,
     logreg_C_coef,
     logreg_C_power,
-    logreg_l1_ratio
+    logreg_l1_ratio,
+    mlp_layers,
+    mlp_activation,
+    mlp_batch_size,
+    mlp_l2_coef,
+    mlp_l2_pow,
 ):
-    t_start = time.time()
     h = 0.3  # step size in the mesh
 
     # Data Pre-processing
@@ -542,10 +640,10 @@ def update_svm_graph(
         X, y, test_size=0.4, random_state=42
     )
 
-    x_min = X[:, 0].min() - 0.5
-    x_max = X[:, 0].max() + 0.5
-    y_min = X[:, 1].min() - 0.5
-    y_max = X[:, 1].max() + 0.5
+    x_min = X[:, 0].min() - 1.5
+    x_max = X[:, 0].max() + 1.5
+    y_min = X[:, 1].min() - 1.5
+    y_max = X[:, 1].max() + 1.5
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
 
     if model == "SVM":
@@ -558,9 +656,14 @@ def update_svm_graph(
             flag = False
 
         clf = SVC(
-            C=C, kernel=kernel, degree=degree, gamma=gamma, shrinking=flag, probability=True
+            C=C,
+            kernel=kernel,
+            degree=degree,
+            gamma=gamma,
+            shrinking=flag,
+            probability=True,
         )
-    
+
     elif model == "LogReg":
         C = logreg_C_coef * 10 ** logreg_C_power
 
@@ -575,8 +678,21 @@ def update_svm_graph(
 
     elif model == "LDA":
         clf = LinearDiscriminantAnalysis()
+
     elif model == "QDA":
         clf = QuadraticDiscriminantAnalysis()
+
+    elif model == "MLP":
+        hidden_layers = tuple(map(int, mlp_layers.split(", ")))
+        l2_penalty = mlp_l2_coef * 10 ** mlp_l2_pow
+
+        clf = MLPClassifier(
+            hidden_layer_sizes=hidden_layers,
+            activation=mlp_activation,
+            batch_size=mlp_batch_size,
+            alpha=l2_penalty,
+        )
+
     else:
         raise ValueError(f"Unsupported model: {model}")
     # clf = DecisionTreeClassifier()
