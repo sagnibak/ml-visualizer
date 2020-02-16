@@ -15,8 +15,14 @@ from sklearn.discriminant_analysis import (
     LinearDiscriminantAnalysis,
     QuadraticDiscriminantAnalysis,
 )
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import (
+    RandomForestClassifier,
+    AdaBoostClassifier,
+    GradientBoostingClassifier,
+)
+from sklearn.neighbors import KNeighborsClassifier
 
 import utils.dash_reusable_components as drc
 import utils.figures as figs
@@ -89,7 +95,7 @@ app.layout = html.Div(
                             id="banner-logo",
                             children=[
                                 html.Img(src=app.get_asset_url("dash-logo-new.png")),
-                                html.H3("Made with")
+                                html.H3("Made with"),
                             ],
                             href="https://plot.ly/products/dash/",
                         ),
@@ -471,9 +477,7 @@ def show_logreg_params(model):
         return {"display": "none"}
 
 
-@app.callback(
-    Output("mlp-params", "style"), [Input("dropdown-select-model", "value")]
-)
+@app.callback(Output("mlp-params", "style"), [Input("dropdown-select-model", "value")])
 def show_mlp_params(model):
     if model == "MLP":
         return {"visibility": "visible"}
@@ -692,6 +696,21 @@ def update_svm_graph(
             batch_size=mlp_batch_size,
             alpha=l2_penalty,
         )
+
+    elif model == "DTree":
+        clf = DecisionTreeClassifier()
+
+    elif model == "RForest":
+        clf = RandomForestClassifier()
+
+    elif model == "ABoost":
+        clf = AdaBoostClassifier()
+
+    elif model == "XGBoost":
+        clf = GradientBoostingClassifier()
+
+    elif model == "kNN":
+        clf = KNeighborsClassifier()
 
     else:
         raise ValueError(f"Unsupported model: {model}")
