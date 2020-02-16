@@ -97,7 +97,7 @@ app.layout = html.Div(
                                         "max-width": "60px",
                                         "max-height": "60px",
                                         "padding-left": "20px",
-                                        "padding-bottom": "25px"
+                                        "padding-bottom": "25px",
                                     },
                                 ),
                             ],
@@ -467,6 +467,47 @@ app.layout = html.Div(
                                             ],
                                         ),
                                         html.Div(
+                                            id="xgboost-params",
+                                            children=[
+                                                drc.NamedSlider(
+                                                    name="Number of Weak Learners",
+                                                    id="slider-xg-n-estim",
+                                                    min=1,
+                                                    max=300,
+                                                    value=50,
+                                                    marks={
+                                                        i: str(i)
+                                                        for i in [1]
+                                                        + list(range(0, 301, 50))
+                                                    },
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="Minimum Leaf Size",
+                                                    id="slider-xg-min-leaf",
+                                                    min=1,
+                                                    max=50,
+                                                    value=1,
+                                                    marks={
+                                                        i: str(i)
+                                                        for i in [1]
+                                                        + list(range(0, 51, 10))
+                                                    },
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="Maximum Depth of Learners",
+                                                    id="slider-xg-max-depth",
+                                                    min=1,
+                                                    max=50,
+                                                    value=3,
+                                                    marks={
+                                                        i: str(i)
+                                                        for i in [1]
+                                                        + list(range(0, 51, 10))
+                                                    },
+                                                ),
+                                            ],
+                                        ),
+                                        html.Div(
                                             id="knn-params",
                                             children=[
                                                 drc.NamedSlider(
@@ -537,6 +578,16 @@ def show_mlp_params(model):
 )
 def show_adaboost_params(model):
     if model == "ABoost":
+        return {"visibility": "visible"}
+    else:
+        return {"display": "none"}
+
+
+@app.callback(
+    Output("xgboost-params", "style"), [Input("dropdown-select-model", "value")]
+)
+def show_adaboost_params(model):
+    if model == "XGBoost":
         return {"visibility": "visible"}
     else:
         return {"display": "none"}
@@ -676,6 +727,9 @@ def update_slider_mlp_penalty_coef(power):
         Input("slider-mlp-penalty-coef", "value"),
         Input("slider-mlp-penalty-power", "value"),
         Input("slider-ab-n-estim", "value"),
+        Input("slider-xg-n-estim", "value"),
+        Input("slider-xg-min-leaf", "value"),
+        Input("slider-xg-max-depth", "value"),
         Input("slider-knn-k", "value"),
     ],
 )
@@ -702,6 +756,9 @@ def update_svm_graph(
     mlp_l2_coef,
     mlp_l2_pow,
     aboost_n_estimators,
+    xg_n_estimators,
+    xg_min_leaf_size,
+    xg_max_depth,
     knn_k,
 ):
     h = 0.3  # step size in the mesh
@@ -776,7 +833,11 @@ def update_svm_graph(
         clf = AdaBoostClassifier(n_estimators=aboost_n_estimators)
 
     elif model == "XGBoost":
-        clf = GradientBoostingClassifier()
+        clf = GradientBoostingClassifier(
+            n_estimators=xg_n_estimators,
+            min_samples_leaf=xg_min_leaf_size,
+            max_depth=xg_max_depth,
+        )
 
     elif model == "kNN":
         clf = KNeighborsClassifier(n_neighbors=knn_k)
