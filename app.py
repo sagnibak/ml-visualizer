@@ -426,7 +426,7 @@ app.layout = html.Div(
                                                     name="Hidden layer sizes",
                                                     id="input-mlp-layers",
                                                     type="text",
-                                                    value="100, 100",
+                                                    value="10, 10",
                                                     placeholder="layer 1, layer 2, ...",
                                                     debounce=True,
                                                     style={"color": "inherit"},
@@ -446,6 +446,17 @@ app.layout = html.Div(
                                                     clearable=False,
                                                     searchable=True,
                                                     value="relu",
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="Max Number of Epochs",
+                                                    id="slider-mlp-max-iter",
+                                                    min=1,
+                                                    max=2000,
+                                                    value=200,
+                                                    marks={
+                                                        i: str(i) for i in [1] +
+                                                            list(range(0, 2001, 400))
+                                                    },
                                                 ),
                                                 drc.NamedSlider(
                                                     name="Batch Size",
@@ -836,6 +847,7 @@ def update_slider_mlp_penalty_coef(power):
         Input("slider-logreg-l1-ratio", "value"),
         Input("input-mlp-layers", "value"),
         Input("dropdown-mlp-activation", "value"),
+        Input("slider-mlp-max-iter", "value"),
         Input("slider-mlp-batch-size", "value"),
         Input("slider-mlp-penalty-coef", "value"),
         Input("slider-mlp-penalty-power", "value"),
@@ -870,6 +882,7 @@ def update_svm_graph(
     logreg_l1_ratio,
     mlp_layers,
     mlp_activation,
+    mlp_max_iter,
     mlp_batch_size,
     mlp_l2_coef,
     mlp_l2_pow,
@@ -938,12 +951,13 @@ def update_svm_graph(
     elif model == "MLP":
         hidden_layers = tuple(map(int, mlp_layers.split(", ")))
         l2_penalty = mlp_l2_coef * 10 ** mlp_l2_pow
-
+        
         clf = MLPClassifier(
             hidden_layer_sizes=hidden_layers,
             activation=mlp_activation,
             batch_size=mlp_batch_size,
             alpha=l2_penalty,
+            max_iter=mlp_max_iter
         )
 
     elif model == "DTree":
