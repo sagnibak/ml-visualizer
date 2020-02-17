@@ -113,6 +113,7 @@ app.layout = html.Div(
                             children=[
                                 html.A(
                                     "Decision Boundary Visualizer",
+                                    href="https://github.com/sagnibak/ml-visualizer",
                                     style={
                                         "text-decoration": "none",
                                         "color": "inherit",
