@@ -47,6 +47,22 @@ def generate_data(n_samples, dataset, noise):
         )
 
     elif dataset == "linear":
+        n_pos = n_samples // 2
+        n_neg = n_samples - n_pos
+
+        X = np.vstack((np.linspace(-0.8, 1.2, n_pos), np.linspace(-2.4, 0.0, n_pos))).T
+        X = np.vstack(
+            (X, np.vstack((np.linspace(-0.5, 1, n_neg), np.linspace(-1, 1, n_neg))).T)
+        )
+        y = np.hstack((np.ones(n_pos), np.zeros(n_neg)))
+
+        # rng = np.random.RandomState(2)
+        X += noise * np.random.uniform(size=X.shape)
+        linearly_separable = (X, y)
+
+        return linearly_separable
+
+    elif dataset == "gaussians":
         X, y = datasets.make_classification(
             n_samples=n_samples,
             n_features=2,
@@ -56,11 +72,11 @@ def generate_data(n_samples, dataset, noise):
             n_clusters_per_class=1,
         )
 
-        rng = np.random.RandomState(2)
-        X += noise * rng.uniform(size=X.shape)
-        linearly_separable = (X, y)
+        # rng = np.random.RandomState(9)
+        X += noise * np.random.uniform(size=X.shape)
+        two_gaussians = (X, y)
 
-        return linearly_separable
+        return two_gaussians
 
     else:
         raise ValueError(
@@ -192,6 +208,10 @@ app.layout = html.Div(
                                                 {
                                                     "label": "Circles",
                                                     "value": "circles",
+                                                },
+                                                {
+                                                    "label": "Two Gaussians",
+                                                    "value": "gaussians",
                                                 },
                                             ],
                                             clearable=False,
