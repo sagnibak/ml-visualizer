@@ -318,8 +318,20 @@ app.layout = html.Div(
                                                     value=3,
                                                     step=1,
                                                     marks={
-                                                        str(i): str(i)
+                                                        i: str(i)
                                                         for i in range(2, 11, 2)
+                                                    },
+                                                ),
+                                                drc.NamedSlider(
+                                                    name="Zero-order Kernel Term",
+                                                    id="slider-svm-coef0",
+                                                    min=0,
+                                                    max=2,
+                                                    value=1,
+                                                    step=0.01,
+                                                    marks={
+                                                        i: str(i)
+                                                        for i in [0, 0.5, 1, 1.5, 2]
                                                     },
                                                 ),
                                                 drc.NamedSlider(
@@ -710,7 +722,7 @@ def show_adaboost_params(model):
 @app.callback(
     Output("xgboost-params", "style"), [Input("dropdown-select-model", "value")]
 )
-def show_adaboost_params(model):
+def show_xgboost_params(model):
     if model == "XGBoost":
         return {"visibility": "visible"}
     else:
@@ -757,6 +769,14 @@ def reset_threshold_center(n_clicks):
 )
 def disable_slider_param_degree(kernel):
     return kernel != "poly"
+
+
+@app.callback(
+    Output("slider-svm-coef0", "disabled"),
+    [Input("dropdown-svm-parameter-kernel", "value")],
+)
+def disable_slider_param_degree(kernel):
+    return kernel != "poly" and kernel != "sigmoid"
 
 
 @app.callback(
@@ -841,6 +861,7 @@ def update_slider_mlp_penalty_coef(power):
         Input("radio-svm-parameter-shrinking", "value"),
         Input("slider-threshold", "value"),
         Input("slider-dataset-sample-size", "value"),
+        Input("slider-svm-coef0", "value"),
         Input("dropdown-logreg-regtype", "value"),
         Input("slider-logreg-C-coef", "value"),
         Input("slider-logreg-C-power", "value"),
@@ -876,6 +897,7 @@ def update_svm_graph(
     shrinking,
     threshold,
     sample_size,
+    svm_coef0,
     logreg_reg_type,
     logreg_C_coef,
     logreg_C_power,
@@ -928,6 +950,7 @@ def update_svm_graph(
             gamma=gamma,
             shrinking=flag,
             probability=True,
+            coef0=svm_coef0
         )
 
     elif model == "LogReg":
